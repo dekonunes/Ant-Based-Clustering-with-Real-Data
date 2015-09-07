@@ -6,10 +6,10 @@ CPP11=-std=c++11
 all: ant
 
 main.o: main.cpp
-	g++ $(CPP11) $(DEBUG) -c -Wall main.cpp $(SFML_INCLUDE)
+	g++ $(CPP11) $(DEBUG) -c -Wall main.cpp ant.cpp graphicInterface.cpp grid.cpp $(SFML_INCLUDE)
 	
 ant: main.o
-	g++ main.o -o ant -pthread $(SFML_LIB)
+	g++ main.o ant.o graphicInterface.o grid.o -o ant -pthread $(SFML_LIB)
 
 clean:
 	rm -rf *.gch *o ant *~; clear;clear;
