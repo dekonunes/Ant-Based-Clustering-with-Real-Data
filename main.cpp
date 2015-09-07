@@ -1,34 +1,44 @@
 #include "main.hpp"
 
 int main(int argc, char *argv[]) {
-	if (argc < 6) {
+	if (argc < 5) {
 		cout
 				<< "Digite os parametros: 1º Linhas Matriz 2º Colunas Matriz 3º Qtd Formigas 4º Qtd Itens 5º Qtd iterações 6º Variação do raio de cada formiga"
-				<< endl << "Exemplo: ./ant 10 10 10 25 500000 1" << endl;
+				<< endl << "Exemplo: ./ant 40 40 10 500000 1" << endl;
 		exit(0);
 	}
 	//int tamMatrizI = 40, tamMatrizJ = 40, qtdFormigas = 100, qtdItens = 250, qtdLoop = 1000000, raio = 1;
 	int qtdLoop;
-	int tamMatrizI = atoi(argv[1]), tamMatrizJ = atoi(argv[2]), qtdFormigas = atoi(argv[3]), qtdItens = atoi(argv[4]),
-		raio = atoi(argv[6]);
-	qtdLoop = atoi(argv[5]);
-	if (qtdFormigas >= qtdItens) {
-	 cout << "Amigo ele vai entrar em loop, porfavor coloque mais itens que formigas" << endl;
-	 exit(0);
-	 }
-	//0 em branco, 1 item, 2 formiga sem item em baixo, 3 formiga e item (solto), 4 formiga e item (segurando) nada em baixo, 5 formiga e item (segurando) item em baixo
+	int tamMatrizI = atoi(argv[1]), tamMatrizJ = atoi(argv[2]), qtdFormigas = atoi(argv[3]), raio = atoi(argv[5]);
+	qtdLoop = atoi(argv[4]);
+	//0 em branco, 1,2,3 e 4 item, 6 formiga sem item em baixo, 7 formiga e item (solto), 8 formiga e item (segurando) nada em baixo, 9 formiga e item (segurando) item em baixo
 	srand(time(NULL));
-	vector<vector<int> > matriz;
+	vector<vector<item> > matriz;
 	vector<formiga> formigas;
 	montarMatriz(&matriz, tamMatrizI, tamMatrizJ);
-	povoarItensMatriz(&matriz, qtdItens, tamMatrizI, tamMatrizJ);
+	povoarItensMatriz(&matriz, tamMatrizI, tamMatrizJ);
 	povoarFormigas(&matriz, &formigas, qtdFormigas, raio, tamMatrizI, tamMatrizJ);
+	//movimentoDasFormigas(&matriz, &formigas.at(0), qtdFormigas, tamMatrizI,tamMatrizJ);
+	
+	for (int var = 0; var < qtdLoop; ++var) {
+		for (int var2 = 0; var2 < qtdFormigas; ++var2) {
+			movimentoDasFormigas(&matriz, &formigas.at(var2), qtdFormigas, tamMatrizI, tamMatrizJ);
+			usleep(TEMPO);
+			//getchar();
+			if (system("CLS"))
+				system("clear");
+			//cout << "-------------------------------" << endl;
+			mostrarMatriz(&matriz, tamMatrizI, tamMatrizJ);
+		}
+	}
 	//interfaceGrafica(&matriz, &formigas, qtdFormigas, tamMatrizI, tamMatrizJ, qtdLoop);
 	//usleep(80000000);
+	mostrarMatriz(&matriz, tamMatrizI, tamMatrizJ);
 	return 0;
 }
 
-void interfaceGrafica(vector<vector<int> > *matriz, vector<formiga> *formigas, int qtdFormigas, int tamMatrizI,int tamMatrizJ, int qtdLoop) {
+void interfaceGrafica(vector<vector<item> > *matriz, vector<formiga> *formigas, int qtdFormigas, int tamMatrizI,
+		int tamMatrizJ, int qtdLoop) {
 	bool flag;
 	sf::RenderWindow *window;
 	std::vector<std::vector<sf::RectangleShape> > grid;
@@ -45,7 +55,7 @@ void interfaceGrafica(vector<vector<int> > *matriz, vector<formiga> *formigas, i
 
 			flag = false;
 			if (!flag) {
-				if (matriz->at(i).at(j) == 0)
+				if (matriz->at(i).at(j).classe == 0)
 					row[j].setFillColor(sf::Color(sf::Color::White)); // espaço livre
 				else
 					row[j].setFillColor(sf::Color(sf::Color(128, 128, 128))); // item
@@ -54,30 +64,31 @@ void interfaceGrafica(vector<vector<int> > *matriz, vector<formiga> *formigas, i
 		grid.push_back(row);
 	}
 
-	for (int i = 0; i < qtdLoop; ++i){
+	for (int i = 0; i < qtdLoop; ++i) {
 
 		update(matriz, formigas, qtdFormigas, tamMatrizI, tamMatrizJ, window, &grid);
 		//if (i == 1)
-			//usleep(10000000);
+		//usleep(10000000);
 	}
 	for (int i = 0; i < qtdFormigas; i++) {
-		if (matriz->at(formigas->at(i).i).at(formigas->at(i).j) == 2)
-			matriz->at(formigas->at(i).i).at(formigas->at(i).j) = 0;
-		if (matriz->at(formigas->at(i).i).at(formigas->at(i).j) == 3)
-			matriz->at(formigas->at(i).i).at(formigas->at(i).j) = 1;
+		if (matriz->at(formigas->at(i).i).at(formigas->at(i).j).classe == 6)
+			matriz->at(formigas->at(i).i).at(formigas->at(i).j).classe = 0;
+		if (matriz->at(formigas->at(i).i).at(formigas->at(i).j).classe == 7)
+			matriz->at(formigas->at(i).i).at(formigas->at(i).j).classe = formigas->at(i).item->classe;
 	}
 	for (int i = 0; i < qtdFormigas; i++) {
-		while (formigas->at(i).item == 1) {
+		while (formigas->at(i).item->classe == 1) {
 			updateFinal(matriz, &formigas->at(i), qtdFormigas, tamMatrizI, tamMatrizJ, window, &grid); //para não deixar nenhuma formiga carregando quando termina
 		}
-		if (matriz->at(formigas->at(i).i).at(formigas->at(i).j) == 2)
-			matriz->at(formigas->at(i).i).at(formigas->at(i).j) = 0;
-		if (matriz->at(formigas->at(i).i).at(formigas->at(i).j) == 3)
-			matriz->at(formigas->at(i).i).at(formigas->at(i).j) = 1;
+		if (matriz->at(formigas->at(i).i).at(formigas->at(i).j).classe == 6)
+			matriz->at(formigas->at(i).i).at(formigas->at(i).j).classe = 0;
+		if (matriz->at(formigas->at(i).i).at(formigas->at(i).j).classe == 7)
+			matriz->at(formigas->at(i).i).at(formigas->at(i).j).classe = formigas->at(i).item->classe;
 	}
 }
 
-void updateFinal(vector<vector<int> > *matriz, formiga *formigas, int qtdFormigas, int tamMatrizI,int tamMatrizJ, sf::RenderWindow *window, std::vector<std::vector<sf::RectangleShape> > *grid) {
+void updateFinal(vector<vector<item> > *matriz, formiga *formigas, int qtdFormigas, int tamMatrizI, int tamMatrizJ,
+		sf::RenderWindow *window, std::vector<std::vector<sf::RectangleShape> > *grid) {
 	movimentoFinal(matriz, formigas, qtdFormigas, tamMatrizI, tamMatrizJ);
 	updateColor(matriz, formigas, qtdFormigas, tamMatrizI, tamMatrizJ, grid, 1);
 	for (int i = 0; i < tamMatrizI; i++)
@@ -86,7 +97,8 @@ void updateFinal(vector<vector<int> > *matriz, formiga *formigas, int qtdFormiga
 	window->display();
 }
 
-void update(vector<vector<int> > *matriz, vector<formiga> *formigas, int qtdFormigas, int tamMatrizI, int tamMatrizJ,sf::RenderWindow *window, std::vector<std::vector<sf::RectangleShape> > *grid) {
+void update(vector<vector<item> > *matriz, vector<formiga> *formigas, int qtdFormigas, int tamMatrizI, int tamMatrizJ,
+		sf::RenderWindow *window, std::vector<std::vector<sf::RectangleShape> > *grid) {
 	for (int i = 0; i < qtdFormigas; i++) {
 		movimentoDasFormigas(matriz, &formigas->at(i), qtdFormigas, tamMatrizI, tamMatrizJ);
 		updateColor(matriz, &formigas->at(i), qtdFormigas, tamMatrizI, tamMatrizJ, grid, 0);
@@ -98,26 +110,39 @@ void update(vector<vector<int> > *matriz, vector<formiga> *formigas, int qtdForm
 	window->display();
 }
 
-void updateColor(vector<vector<int> > *matriz, formiga *formigas, int qtdFormigas, int tamMatrizI,int tamMatrizJ, std::vector<std::vector<sf::RectangleShape> > *grid, int cor) {
+void updateColor(vector<vector<item> > *matriz, formiga *formigas, int qtdFormigas, int tamMatrizI, int tamMatrizJ,
+		std::vector<std::vector<sf::RectangleShape> > *grid, int cor) {
 	bool flag;
 	for (int i = 0; i < tamMatrizI; i++) {
 		for (int j = 0; j < tamMatrizJ; j++) {
 			flag = false;
-			if ((matriz->at(i).at(j) == 2) ) {
+			if ((matriz->at(i).at(j).classe == 6)) {
 				flag = true;
-					grid->at(i).at(j).setFillColor(sf::Color(sf::Color::Red)); // formiga sem item
-			} else if ((matriz->at(i).at(j) == 4)) {
-					flag = true;
-					grid->at(i).at(j).setFillColor(sf::Color(sf::Color::Black)); // formiga com item
-				} else if ((matriz->at(i).at(j) == 3)) {
-					flag = true;
-					grid->at(i).at(j).setFillColor(sf::Color(sf::Color::Green));
-				} else if ((matriz->at(i).at(j) == 5)) {
-					flag = true;
-					grid->at(i).at(j).setFillColor(sf::Color(sf::Color::Yellow));
-				}
+				grid->at(i).at(j).setFillColor(sf::Color(sf::Color::Red)); // formiga sem item
+			} else if ((matriz->at(i).at(j).classe == 8)) {
+				flag = true;
+				grid->at(i).at(j).setFillColor(sf::Color(sf::Color::Black)); // formiga com item
+			} else if ((matriz->at(i).at(j).classe == 7)) {
+				flag = true;
+				grid->at(i).at(j).setFillColor(sf::Color(sf::Color::Green));
+			} else if ((matriz->at(i).at(j).classe == 9)) {
+				flag = true;
+				grid->at(i).at(j).setFillColor(sf::Color(sf::Color::Yellow));
+			} else if ((matriz->at(i).at(j).classe == 2)) {
+				flag = true;
+				grid->at(i).at(j).setFillColor(sf::Color(sf::Color::Magenta));
+			} else if ((matriz->at(i).at(j).classe == 3)) {
+				flag = true;
+				grid->at(i).at(j).setFillColor(sf::Color(sf::Color::Cyan));
+			} else if ((matriz->at(i).at(j).classe == 4)) {
+				flag = true;
+				grid->at(i).at(j).setFillColor(sf::Color(sf::Color(0, 0, 1)));
+			} else if ((matriz->at(i).at(j).classe == 5)) {
+				flag = true;
+				grid->at(i).at(j).setFillColor(sf::Color(sf::Color(1, 0, 0)));
+			}
 			if (!flag) {
-				if (matriz->at(i).at(j) == 0)
+				if (matriz->at(i).at(j).classe == 0)
 					grid->at(i).at(j).setFillColor(sf::Color(sf::Color::White));
 				else
 					grid->at(i).at(j).setFillColor(sf::Color(sf::Color::Blue)); //item
@@ -126,29 +151,27 @@ void updateColor(vector<vector<int> > *matriz, formiga *formigas, int qtdFormiga
 	}
 }
 
-void movimentoFinal(vector<vector<int> > *matriz, formiga *formigas, int qtdFormigas, int tamMatrizI,
-		int tamMatrizJ) {
-			movimentoDasFormigas(matriz, formigas, qtdFormigas, tamMatrizI, tamMatrizJ);
+void movimentoFinal(vector<vector<item> > *matriz, formiga *formigas, int qtdFormigas, int tamMatrizI, int tamMatrizJ) {
+	movimentoDasFormigas(matriz, formigas, qtdFormigas, tamMatrizI, tamMatrizJ);
 }
 
-void probabilidadeItens(vector<vector<int> > *matriz, formiga *formiga, int probabilidade) {
+void probabilidadeItens(vector<vector<item> > *matriz, formiga *formiga, int probabilidade) {
 	int random = rand() % 100;
-	if (formiga->item == 1) {
-		if (((random < probabilidade) && (matriz->at(formiga->i).at(formiga->j) == 4))) {
-			matriz->at(formiga->i).at(formiga->j) = 3;
+	if (formiga->item->classe > 1) {
+		if (((random < probabilidade) && (matriz->at(formiga->i).at(formiga->j).classe == 7))) {
+			matriz->at(formiga->i).at(formiga->j).classe = 6;
 			formiga->item = 0;
 		}
-	} else if (formiga->item == 0) {
-		if ((random > probabilidade) && (matriz->at(formiga->i).at(formiga->j) == 3)) {
-			matriz->at(formiga->i).at(formiga->j) = 4;
-			formiga->item = 1;
+	} else if (formiga->item->classe == 0) {
+		if ((random > probabilidade) && (matriz->at(formiga->i).at(formiga->j).classe == 6)) {
+			formiga->item->classe = matriz->at(formiga->i).at(formiga->j).classe;
+			matriz->at(formiga->i).at(formiga->j).classe = 7;
 		}
 	}
 }
 
-float visibilidadeItem(vector<vector<int> > *matriz, formiga *formiga, int tamMatrizI, int tamMatrizJ) {
-	int iAux = 0, jAux = 0, linhasMatriz = 3, aux1 = 0, aux2 = 0, aux3 = 0,
-			aux4 = 0, aux5 = 0;
+float visibilidadeItem(vector<vector<item> > *matriz, formiga *formiga, int tamMatrizI, int tamMatrizJ) {
+	int iAux = 0, jAux = 0, linhasMatriz = 3, aux1 = 0, aux2 = 0, aux3 = 0, aux4 = 0, aux5 = 0;
 	float qtdItensRedor = 0;
 	formiga->tamVisao = 0; //quantidade de celular analizadas
 	iAux = formiga->i - 1;
@@ -166,7 +189,7 @@ float visibilidadeItem(vector<vector<int> > *matriz, formiga *formiga, int tamMa
 				jAux = (tamMatrizJ - (var2));
 			if (jAux > tamMatrizJ)
 				jAux = 0;
-			if (matriz->at(iAux).at(jAux) == 1)
+			if (matriz->at(iAux).at(jAux).classe == formiga->item->classe)
 				qtdItensRedor++;
 			formiga->tamVisao++;
 			jAux++;
@@ -185,7 +208,7 @@ float visibilidadeItem(vector<vector<int> > *matriz, formiga *formiga, int tamMa
 				jAux = 0 + aux3;
 				aux3++;
 			}
-			if (matriz->at(iAux).at(jAux) == 1)
+			if (matriz->at(iAux).at(jAux).classe == formiga->item->classe)
 				qtdItensRedor++;
 			formiga->tamVisao++;
 			iAux++;
@@ -201,7 +224,7 @@ float visibilidadeItem(vector<vector<int> > *matriz, formiga *formiga, int tamMa
 				jAux = tamMatrizJ;
 			if (jAux > tamMatrizJ)
 				jAux = 0;
-			if (matriz->at(iAux).at(jAux) == 1)
+			if (matriz->at(iAux).at(jAux).classe == formiga->item->classe)
 				qtdItensRedor++;
 			formiga->tamVisao++;
 			jAux--;
@@ -217,7 +240,7 @@ float visibilidadeItem(vector<vector<int> > *matriz, formiga *formiga, int tamMa
 				jAux = tamMatrizJ - aux5;
 				aux5++;
 			}
-			if (matriz->at(iAux).at(jAux) == 1)
+			if (matriz->at(iAux).at(jAux).classe == formiga->item->classe)
 				qtdItensRedor++;
 			formiga->tamVisao++;
 			iAux--;
@@ -230,29 +253,67 @@ float visibilidadeItem(vector<vector<int> > *matriz, formiga *formiga, int tamMa
 			* (qtdItensRedor / (qtdItensRedor + formiga->tamVisao)));
 }
 
-void montarMatriz(vector<vector<int> > *matriz, int tamI, int tamJ) {
+void montarMatriz(vector<vector<item> > *matriz, int tamI, int tamJ) {
+	item itemAux;
+	itemAux.number1 = 0;
+	itemAux.number2 = 0;
+	itemAux.number3 = 0;
+	itemAux.number4 = 0;
+	itemAux.classe = 0;
 	for (int i = 0; i < tamI; ++i) {
-		vector<int> row;
+		vector<item> row;
 		for (int j = 0; j < tamJ; ++j) {
-			row.push_back(0);
+			row.push_back(itemAux);
 		}
 		matriz->push_back(row);
 	}
 }
 
-void mostrarMatriz(vector<vector<int> > *matriz, int tamMatrizI, int tamMatrizJ) {
+void mostrarMatriz(vector<vector<item> > *matriz, int tamMatrizI, int tamMatrizJ) {
 	for (int i = 0; i < tamMatrizI; ++i) {
 		for (int j = 0; j < tamMatrizJ; ++j) {
-			if (matriz->at(i).at(j) == 1) {
-				cout << "\033[1;34m" << matriz->at(i).at(j) << "\033[0m";
-			} else if (matriz->at(i).at(j) == 2) {
-				cout << "\033[1;31m" << matriz->at(i).at(j) << "\033[0m";
-			} else if (matriz->at(i).at(j) == 3) {
-				cout << "\033[1;32m" << matriz->at(i).at(j) << "\033[0m";
-			} else if (matriz->at(i).at(j) == 4) {
-				cout << "\033[1;33m" << matriz->at(i).at(j) << "\033[0m";
-			} else if (matriz->at(i).at(j) == 5) {
-				cout << "\033[1;35m" << matriz->at(i).at(j) << "\033[0m";
+			if (matriz->at(i).at(j).classe == 1) {
+				cout << "\033[1;34m" << matriz->at(i).at(j).classe << "\033[0m";
+			} else if (matriz->at(i).at(j).classe == 2) {
+				cout << "\033[1;31m" << matriz->at(i).at(j).classe << "\033[0m";
+			} else if (matriz->at(i).at(j).classe == 3) {
+				cout << "\033[1;32m" << matriz->at(i).at(j).classe << "\033[0m";
+			} else if (matriz->at(i).at(j).classe == 4) {
+				cout << "\033[1;33m" << matriz->at(i).at(j).classe << "\033[0m";
+			} else if (matriz->at(i).at(j).classe == 5) {
+				cout << "\033[1;35m" << matriz->at(i).at(j).classe << "\033[0m";
+			} else if (matriz->at(i).at(j).classe == 6) {
+				cout << "\033[1;36m" << matriz->at(i).at(j).classe << "\033[0m";
+			} else if (matriz->at(i).at(j).classe == 7) {
+				cout << "\033[1;37m" << matriz->at(i).at(j).classe << "\033[0m";
+			} else if (matriz->at(i).at(j).classe == 8) {
+				cout << "\033[1;38m" << matriz->at(i).at(j).classe << "\033[0m";
+			} else if (matriz->at(i).at(j).classe == 9) {
+				cout << "\033[1;39m" << matriz->at(i).at(j).classe << "\033[0m";
+			} else {
+				//cout << matriz->at(i).at(j).classe;
+				cout << " ";
+			}
+		}
+		cout << endl;
+	}
+}
+
+void mostrarMatrizLimpa(vector<vector<item> > *matriz, int tamMatrizI, int tamMatrizJ) {
+	for (int i = 0; i < tamMatrizI; ++i) {
+		for (int j = 0; j < tamMatrizJ; ++j) {
+			if (matriz->at(i).at(j).classe == 1) {
+				cout << "\033[1;34m" << matriz->at(i).at(j).classe << "\033[0m";
+			} else if (matriz->at(i).at(j).classe == 2) {
+				cout << "\033[1;31m" << matriz->at(i).at(j).classe << "\033[0m";
+			} else if (matriz->at(i).at(j).classe == 3) {
+				cout << "\033[1;32m" << matriz->at(i).at(j).classe << "\033[0m";
+			} else if (matriz->at(i).at(j).classe == 4) {
+				cout << "\033[1;33m" << matriz->at(i).at(j).classe << "\033[0m";
+			} else if (matriz->at(i).at(j).classe == 8) {
+				cout << "\033[1;38m" << matriz->at(i).at(j).classe << "\033[0m";
+			} else if (matriz->at(i).at(j).classe == 9) {
+				cout << "\033[1;39m" << matriz->at(i).at(j).classe << "\033[0m";
 			} else {
 				//cout << matriz->at(i).at(j);
 				cout << " ";
@@ -262,346 +323,368 @@ void mostrarMatriz(vector<vector<int> > *matriz, int tamMatrizI, int tamMatrizJ)
 	}
 }
 
-void mostrarMatrizLimpa(vector<vector<int> > *matriz, int tamMatrizI, int tamMatrizJ) {
-	for (int i = 0; i < tamMatrizI; ++i) {
-		for (int j = 0; j < tamMatrizJ; ++j) {
-			if (matriz->at(i).at(j) == 1) {
-				cout << "\033[1;34m" << matriz->at(i).at(j) << "\033[0m";
-			} else if (matriz->at(i).at(j) == 4) {
-				cout << "\033[1;34m" << 1 << "\033[0m";
-			} else if (matriz->at(i).at(j) == 5) {
-				cout << "\033[1;34m" << 1 << "\033[0m";
-			} else {
-				//cout << matriz->at(i).at(j);
-				cout << " ";
-			}
-		}
-		cout << endl;
-	}
-}
-
-void povoarFormigas(vector<vector<int> > *matriz, vector<formiga> *formigas, int qtdFormigas, int raio, int tamMatrizI,int tamMatrizJ) {
+void povoarFormigas(vector<vector<item> > *matriz, vector<formiga> *formigas, int qtdFormigas, int raio, int tamMatrizI,
+		int tamMatrizJ) {
 	formiga formigaAux;
 	for (int var = 0; var < qtdFormigas; ++var) {
 		formigaAux.i = rand() % tamMatrizI;
 		formigaAux.j = rand() % tamMatrizJ;
-		formigaAux.item = 0;
+		formigaAux.item->number1 = 0;
+		formigaAux.item->number2 = 0;
+		formigaAux.item->number3 = 0;
+		formigaAux.item->number4 = 0;
+		formigaAux.item->classe = 0;
 		//formigaAux.raio = (rand() % raio) + 1;
 		formigaAux.raio = raio;
-		if (matriz->at(formigaAux.i).at(formigaAux.j) == 0) {
-			matriz->at(formigaAux.i).at(formigaAux.j) = 2;
+		if (matriz->at(formigaAux.i).at(formigaAux.j).classe == 0) {
+			matriz->at(formigaAux.i).at(formigaAux.j).classe = 6;
 			formigas->push_back(formigaAux);
-		} else if (matriz->at(formigaAux.i).at(formigaAux.j) == 1) {
-			matriz->at(formigaAux.i).at(formigaAux.j) = 3;
+		} else if ((matriz->at(formigaAux.i).at(formigaAux.j).classe >= 1)
+				&& (matriz->at(formigaAux.i).at(formigaAux.j).classe < 6)) {
+			matriz->at(formigaAux.i).at(formigaAux.j).classe = 7;
 			formigas->push_back(formigaAux);
-		} else if ((matriz->at(formigaAux.i).at(formigaAux.j) == 2)
-				|| (matriz->at(formigaAux.i).at(formigaAux.j) == 3)) {
+		} else if (matriz->at(formigaAux.i).at(formigaAux.j).classe <= 6)
 			var--;
-		}
+
 	}
 }
 
-void povoarItensMatriz(vector<vector<int> > *matriz, int qtdItens, int tamMatrizI, int tamMatrizJ) {
-	int i, j;
+void povoarItensMatriz(vector<vector<item> > *matriz, int tamMatrizI, int tamMatrizJ) {
+	int i, j, lines = 0, linesAux = 0, dimension = -1, flag = 0;
 	double aux;
 	vector<vector<double> > itens;
 	char c;
-	FILE *file = fopen ("Square1_DataSet_400itens.txt", "r");
-
-	if (file == NULL) 
-        exit(EXIT_FAILURE);
+	FILE *file = fopen("Square1_DataSet_400itens.txt", "r");
+	if (file == NULL)
+		exit(EXIT_FAILURE);
 
 	while (c != '#') {
 		c = ' ';
 		vector<double> row;
-		while(c != '\n'){
-			fscanf (file, "%lf", &aux);
+		while (c != '\n') {
+			fscanf(file, "%lf", &aux);
 			row.push_back(aux);
 			c = fgetc(file);
+			if (!flag)
+				dimension++;
 			if (c == '#')
 				break;
 		}
 		itens.push_back(row);
+		flag = 1;
+		lines++;
 	}
 
-	for (int var = 0; var < qtdItens; ++var) {
+	for (int var = 0; var < lines; ++var) {
 		i = rand() % tamMatrizI;
 		j = rand() % tamMatrizJ;
-		if (matriz->at(i).at(j) == 0) {
-			matriz->at(i).at(j) = 1;
-		} else if (matriz->at(i).at(j) == 1) {
+		if (matriz->at(i).at(j).classe == 0) {
+			switch (dimension) {
+				case 1:
+				matriz->at(i).at(j).number1 = itens.at(linesAux).at(0);
+				break;
+				case 2:
+				matriz->at(i).at(j).number1 = itens.at(linesAux).at(0);
+				matriz->at(i).at(j).number1 = itens.at(linesAux).at(1);
+				break;
+				case 3:
+				matriz->at(i).at(j).number1 = itens.at(linesAux).at(0);
+				matriz->at(i).at(j).number1 = itens.at(linesAux).at(1);
+				matriz->at(i).at(j).number1 = itens.at(linesAux).at(2);
+				break;
+				case 4:
+				matriz->at(i).at(j).number1 = itens.at(linesAux).at(0);
+				matriz->at(i).at(j).number1 = itens.at(linesAux).at(1);
+				matriz->at(i).at(j).number1 = itens.at(linesAux).at(2);
+				matriz->at(i).at(j).number1 = itens.at(linesAux).at(3);
+				break;
+				default:
+				break;
+			}
+			matriz->at(i).at(j).classe = itens.at(linesAux).at(dimension);
+			linesAux++;
+
+		} else if (matriz->at(i).at(j).classe == 1) {
+			var--;
+		} else if (matriz->at(i).at(j).classe == 2) {
+			var--;
+		} else if (matriz->at(i).at(j).classe == 3) {
+			var--;
+		} else if (matriz->at(i).at(j).classe == 4) {
 			var--;
 		}
 	}
 	fclose(file);
 }
 
-void movimentoDasFormigas(vector<vector<int> > *matriz, formiga *formigas, int qtdFormigas, int tamMatrizI,	int tamMatrizJ) {
-	int iAux = formigas->i, jAux = formigas->j;
-	int direcao, probInteiro;
+void movimentoDasFormigas(vector<vector<item> > *matriz, formiga *formiga, int qtdFormigas, int tamMatrizI,
+		int tamMatrizJ) {
+	int iAux = formiga->i, jAux = formiga->j,direcao, probInteiro;
 	float probFloat;
-	probFloat = visibilidadeItem(matriz,formigas, tamMatrizI, tamMatrizJ) * 100;
+	//probFloat = visibilidadeItem(matriz, formiga, tamMatrizI, tamMatrizJ) * 100;
 	probInteiro = ceil(probFloat);
-	probabilidadeItens(matriz, formigas, probInteiro);
+	//probabilidadeItens(matriz, formiga, probInteiro);
 	tamMatrizI--;
 	tamMatrizJ--;
 	direcao = rand() % 8;
+	direcao = 7;
+	//cout << "==" << direcao << endl;
 	switch (direcao) {
 	case 0:
 		//movimento para superior esquerdo
+		if (formiga->i == 0)
+			iAux = tamMatrizI +1;
+		if (formiga->j == 0)
+			jAux = tamMatrizJ +1;
 		iAux--;
 		jAux--;
-		if (formigas->i == 0)
-			iAux = tamMatrizI;
-		if (formigas->j == 0)
-			jAux = tamMatrizJ;
-		if (((matriz->at(iAux).at(jAux) == 2)) || ((matriz->at(iAux).at(jAux) == 3))
-				|| ((matriz->at(iAux).at(jAux) == 4)) || ((matriz->at(iAux).at(jAux) == 5)))
+		matriz->at(iAux).at(jAux).temp = matriz->at(iAux).at(jAux).classe;
+		if (matriz->at(iAux).at(jAux).classe >= 6)
 			break;
-		if ((matriz->at(iAux).at(jAux) == 1) && (formigas->item == 1)) {
+		if ((matriz->at(iAux).at(jAux).classe >= 1) && (formiga->item->classe >= 1)) {
 			//atualizar o movimento da formiga segurando item e item em baixo
-			matriz->at(iAux).at(jAux) = 5;
-		} else if ((matriz->at(iAux).at(jAux) == 1) && (formigas->item == 0)) {
+			matriz->at(iAux).at(jAux).classe = 9;
+		} else if ((matriz->at(iAux).at(jAux).classe >= 1) && (formiga->item->classe == 0)) {
 			//atualizar o movimento da formiga SEM item e item em baixo
-			matriz->at(iAux).at(jAux) = 3;
-		} else if ((matriz->at(iAux).at(jAux) == 0) && (formigas->item == 1)) {
+			matriz->at(iAux).at(jAux).classe = 7;
+		} else if ((matriz->at(iAux).at(jAux).classe == 0) && (formiga->item->classe >= 1)) {
 			//atualizar o movimento da formiga segurando item e SEM item em baixo
-			matriz->at(iAux).at(jAux) = 4;
-		} else if ((matriz->at(iAux).at(jAux) == 0) && (formigas->item == 0)) {
+			matriz->at(iAux).at(jAux).classe = 8;
+		} else if ((matriz->at(iAux).at(jAux).classe == 0) && (formiga->item->classe == 0)) {
 			//atualizar o movimento da formiga SEM item e SEM item em baixo
-			matriz->at(iAux).at(jAux) = 2;
+			matriz->at(iAux).at(jAux).classe = 6;
 		}
-		if ((matriz->at(formigas->i).at(formigas->j) == 5)
-				|| (matriz->at(formigas->i).at(formigas->j) == 3)) {
-			matriz->at(formigas->i).at(formigas->j) = 1; //atualiza o lugar para sem formiga com 1 item
-		} else if ((matriz->at(formigas->i).at(formigas->j) == 2)
-				|| (matriz->at(formigas->i).at(formigas->j) == 4)) {
-			matriz->at(formigas->i).at(formigas->j) = 0; //atualiza o lugar para sem formiga e sem item
+		if ((matriz->at(formiga->i).at(formiga->j).classe == 9)
+				|| (matriz->at(formiga->i).at(formiga->j).classe == 7)) {
+			matriz->at(formiga->i).at(formiga->j).classe = matriz->at(formiga->i).at(formiga->j).temp; //atualiza o lugar para sem formiga com 1 item
+		} else if ((matriz->at(formiga->i).at(formiga->j).classe == 6)
+				|| (matriz->at(formiga->i).at(formiga->j).classe == 8)) {
+			matriz->at(formiga->i).at(formiga->j).classe = 0; //atualiza o lugar para sem formiga e sem item
 		}
-		formigas->i = iAux;
-		formigas->j = jAux;
+		formiga->i = iAux;
+		formiga->j = jAux;
 		break;
 	case 1:
 		//movimento para cima
+		if (formiga->i == 0)
+			iAux = tamMatrizI+1;
 		iAux--;
-		if (formigas->i == 0)
-			iAux = tamMatrizI;
-		if (((matriz->at(iAux).at(jAux) == 2)) || ((matriz->at(iAux).at(jAux) == 3))
-				|| ((matriz->at(iAux).at(jAux) == 4)) || ((matriz->at(iAux).at(jAux) == 5)))
+		matriz->at(iAux).at(jAux).temp = matriz->at(iAux).at(jAux).classe;
+		if (matriz->at(iAux).at(jAux).classe >= 6)
 			break;
-		if ((matriz->at(iAux).at(jAux) == 1) && (formigas->item == 1)) {
+		if ((matriz->at(iAux).at(jAux).classe >= 1) && (formiga->item->classe > 1)) {
 			//atualizar o movimento da formiga segurando item e item em baixo
-			matriz->at(iAux).at(jAux) = 5;
-		} else if ((matriz->at(iAux).at(jAux) == 1) && (formigas->item == 0)) {
+			matriz->at(iAux).at(jAux).classe = 9;
+		} else if ((matriz->at(iAux).at(jAux).classe >= 1)&& (formiga->item->classe == 0)) {
 			//atualizar o movimento da formiga SEM item e item em baixo
-			matriz->at(iAux).at(jAux) = 3;
-		} else if ((matriz->at(iAux).at(jAux) == 0) && (formigas->item == 1)) {
+			matriz->at(iAux).at(jAux).classe = 7;
+		} else if ((matriz->at(iAux).at(jAux).classe == 0) && (formiga->item->classe > 1)) {
 			//atualizar o movimento da formiga segurando item e SEM item em baixo
-			matriz->at(iAux).at(jAux) = 4;
-		} else if ((matriz->at(iAux).at(jAux) == 0) && (formigas->item == 0)) {
+			matriz->at(iAux).at(jAux).classe = 8;
+		} else if ((matriz->at(iAux).at(jAux).classe == 0) && (formiga->item->classe == 0)) {
 			//atualizar o movimento da formiga SEM item e SEM item em baixo
-			matriz->at(iAux).at(jAux) = 2;
+			matriz->at(iAux).at(jAux).classe = 6;
 		}
-		if ((matriz->at(formigas->i).at(formigas->j) == 5)
-				|| (matriz->at(formigas->i).at(formigas->j) == 3)) {
-			matriz->at(formigas->i).at(formigas->j) = 1; //atualiza o lugar para sem formiga com 1 item
-		} else if ((matriz->at(formigas->i).at(formigas->j) == 2)
-				|| (matriz->at(formigas->i).at(formigas->j) == 4)) {
-			matriz->at(formigas->i).at(formigas->j) = 0; //atualiza o lugar para sem formiga e sem item
+		if ((matriz->at(formiga->i).at(formiga->j).classe == 9)
+				|| (matriz->at(formiga->i).at(formiga->j).classe == 7)) {
+			matriz->at(formiga->i).at(formiga->j).classe = matriz->at(formiga->i).at(formiga->j).temp; //atualiza o lugar para sem formiga com 1 item
+		} else if ((matriz->at(formiga->i).at(formiga->j).classe == 6)
+				|| (matriz->at(formiga->i).at(formiga->j).classe == 8)) {
+			matriz->at(formiga->i).at(formiga->j).classe = 0; //atualiza o lugar para sem formiga e sem item
 		}
-		formigas->i = iAux;
+		formiga->i = iAux;
 		break;
 	case 2:
 		//movimento para superior direito
+		if (formiga->i == 0)
+			iAux = tamMatrizI +1;
+		if (formiga->j == tamMatrizJ)
+			jAux = -1;
 		iAux--;
 		jAux++;
-		if (formigas->i == 0)
-			iAux = tamMatrizI;
-		if (formigas->j == tamMatrizJ)
-			jAux = 0;
-		if (((matriz->at(iAux).at(jAux) == 2)) || ((matriz->at(iAux).at(jAux) == 3))
-				|| ((matriz->at(iAux).at(jAux) == 4)) || ((matriz->at(iAux).at(jAux) == 5)))
+		matriz->at(iAux).at(jAux).temp = matriz->at(iAux).at(jAux).classe;
+		if (matriz->at(iAux).at(jAux).classe >= 6)
 			break;
-		if ((matriz->at(iAux).at(jAux) == 1) && (formigas->item == 1)) {
+		if ((matriz->at(iAux).at(jAux).classe >= 1) && (formiga->item->classe > 1)) {
 			//atualizar o movimento da formiga segurando item e item em baixo
-			matriz->at(iAux).at(jAux) = 5;
-		} else if ((matriz->at(iAux).at(jAux) == 1) && (formigas->item == 0)) {
+			matriz->at(iAux).at(jAux).classe = 9;
+		} else if ((matriz->at(iAux).at(jAux).classe >= 1)&& (formiga->item->classe == 0)) {
 			//atualizar o movimento da formiga SEM item e item em baixo
-			matriz->at(iAux).at(jAux) = 3;
-		} else if ((matriz->at(iAux).at(jAux) == 0) && (formigas->item == 1)) {
+			matriz->at(iAux).at(jAux).classe = 7;
+		} else if ((matriz->at(iAux).at(jAux).classe == 0) && (formiga->item->classe > 1)) {
 			//atualizar o movimento da formiga segurando item e SEM item em baixo
-			matriz->at(iAux).at(jAux) = 4;
-		} else if ((matriz->at(iAux).at(jAux) == 0) && (formigas->item == 0)) {
+			matriz->at(iAux).at(jAux).classe = 8;
+		} else if ((matriz->at(iAux).at(jAux).classe == 0) && (formiga->item->classe == 0)) {
 			//atualizar o movimento da formiga SEM item e SEM item em baixo
-			matriz->at(iAux).at(jAux) = 2;
+			matriz->at(iAux).at(jAux).classe = 6;
 		}
-		if ((matriz->at(formigas->i).at(formigas->j) == 5)
-				|| (matriz->at(formigas->i).at(formigas->j) == 3)) {
-			matriz->at(formigas->i).at(formigas->j) = 1; //atualiza o lugar para sem formiga com 1 item
-		} else if ((matriz->at(formigas->i).at(formigas->j) == 2)
-				|| (matriz->at(formigas->i).at(formigas->j) == 4)) {
-			matriz->at(formigas->i).at(formigas->j) = 0; //atualiza o lugar para sem formiga e sem item
+		if ((matriz->at(formiga->i).at(formiga->j).classe == 9)
+				|| (matriz->at(formiga->i).at(formiga->j).classe == 7)) {
+			matriz->at(formiga->i).at(formiga->j).classe = matriz->at(formiga->i).at(formiga->j).temp; //atualiza o lugar para sem formiga com 1 item
+		} else if ((matriz->at(formiga->i).at(formiga->j).classe == 6)
+				|| (matriz->at(formiga->i).at(formiga->j).classe == 8)) {
+			matriz->at(formiga->i).at(formiga->j).classe = 0; //atualiza o lugar para sem formiga e sem item
 		}
-		formigas->i = iAux;
-		formigas->j = jAux;
+		formiga->i = iAux;
+		formiga->j = jAux;
 		break;
 	case 3:
 		//movimento para esquerda
+		if (formiga->j == 0)
+			jAux = tamMatrizJ+1;
 		jAux--;
-		if (formigas->j == 0)
-			jAux = tamMatrizJ;
-		if (((matriz->at(iAux).at(jAux) == 2)) || ((matriz->at(iAux).at(jAux) == 3))
-				|| ((matriz->at(iAux).at(jAux) == 4)) || ((matriz->at(iAux).at(jAux) == 5)))
+		matriz->at(iAux).at(jAux).temp = matriz->at(iAux).at(jAux).classe;
+		if (matriz->at(iAux).at(jAux).classe >= 6)
 			break;
-		if ((matriz->at(iAux).at(jAux) == 1) && (formigas->item == 1)) {
+		if ((matriz->at(iAux).at(jAux).classe >= 1) && (formiga->item->classe > 1)) {
 			//atualizar o movimento da formiga segurando item e item em baixo
-			matriz->at(iAux).at(jAux) = 5;
-		} else if ((matriz->at(iAux).at(jAux) == 1) && (formigas->item == 0)) {
+			matriz->at(iAux).at(jAux).classe = 9;
+		} else if ((matriz->at(iAux).at(jAux).classe >= 1)&& (formiga->item->classe == 0)) {
 			//atualizar o movimento da formiga SEM item e item em baixo
-			matriz->at(iAux).at(jAux) = 3;
-		} else if ((matriz->at(iAux).at(jAux) == 0) && (formigas->item == 1)) {
+			matriz->at(iAux).at(jAux).classe = 7;
+		} else if ((matriz->at(iAux).at(jAux).classe == 0) && (formiga->item->classe > 1)) {
 			//atualizar o movimento da formiga segurando item e SEM item em baixo
-			matriz->at(iAux).at(jAux) = 4;
-		} else if ((matriz->at(iAux).at(jAux) == 0) && (formigas->item == 0)) {
+			matriz->at(iAux).at(jAux).classe = 8;
+		} else if ((matriz->at(iAux).at(jAux).classe == 0) && (formiga->item->classe == 0)) {
 			//atualizar o movimento da formiga SEM item e SEM item em baixo
-			matriz->at(iAux).at(jAux) = 2;
+			matriz->at(iAux).at(jAux).classe = 6;
 		}
-		if ((matriz->at(formigas->i).at(formigas->j) == 5)
-				|| (matriz->at(formigas->i).at(formigas->j) == 3)) {
-			matriz->at(formigas->i).at(formigas->j) = 1; //atualiza o lugar para sem formiga com 1 item
-		} else if ((matriz->at(formigas->i).at(formigas->j) == 2)
-				|| (matriz->at(formigas->i).at(formigas->j) == 4)) {
-			matriz->at(formigas->i).at(formigas->j) = 0; //atualiza o lugar para sem formiga e sem item
+		if ((matriz->at(formiga->i).at(formiga->j).classe == 9)
+				|| (matriz->at(formiga->i).at(formiga->j).classe == 7)) {
+			matriz->at(formiga->i).at(formiga->j).classe = matriz->at(formiga->i).at(formiga->j).temp; //atualiza o lugar para sem formiga com 1 item
+		} else if ((matriz->at(formiga->i).at(formiga->j).classe == 6)
+				|| (matriz->at(formiga->i).at(formiga->j).classe == 8)) {
+			matriz->at(formiga->i).at(formiga->j).classe = 0; //atualiza o lugar para sem formiga e sem item
 		}
-		formigas->j = jAux;
+		formiga->j = jAux;
 		break;
 	case 4:
 		//movimento para direita
+		if (formiga->j == tamMatrizJ)
+			jAux = - 1;
 		jAux++;
-		if (formigas->j == tamMatrizJ)
-			jAux = 0;
-		if (((matriz->at(iAux).at(jAux) == 2)) || ((matriz->at(iAux).at(jAux) == 3))
-				|| ((matriz->at(iAux).at(jAux) == 4)) || ((matriz->at(iAux).at(jAux) == 5)))
+		matriz->at(iAux).at(jAux).temp = matriz->at(iAux).at(jAux).classe;
+		if (matriz->at(iAux).at(jAux).classe >= 6)
 			break;
-		if ((matriz->at(iAux).at(jAux) == 1) && (formigas->item == 1)) {
+		if ((matriz->at(iAux).at(jAux).classe >= 1) && (formiga->item->classe > 1)) {
 			//atualizar o movimento da formiga segurando item e item em baixo
-			matriz->at(iAux).at(jAux) = 5;
-		} else if ((matriz->at(iAux).at(jAux) == 1) && (formigas->item == 0)) {
+			matriz->at(iAux).at(jAux).classe = 9;
+		} else if ((matriz->at(iAux).at(jAux).classe >= 1)&& (formiga->item->classe == 0)) {
 			//atualizar o movimento da formiga SEM item e item em baixo
-			matriz->at(iAux).at(jAux) = 3;
-		} else if ((matriz->at(iAux).at(jAux) == 0) && (formigas->item == 1)) {
+			matriz->at(iAux).at(jAux).classe = 7;
+		} else if ((matriz->at(iAux).at(jAux).classe == 0) && (formiga->item->classe > 1)) {
 			//atualizar o movimento da formiga segurando item e SEM item em baixo
-			matriz->at(iAux).at(jAux) = 4;
-		} else if ((matriz->at(iAux).at(jAux) == 0) && (formigas->item == 0)) {
+			matriz->at(iAux).at(jAux).classe = 8;
+		} else if ((matriz->at(iAux).at(jAux).classe == 0) && (formiga->item->classe == 0)) {
 			//atualizar o movimento da formiga SEM item e SEM item em baixo
-			matriz->at(iAux).at(jAux) = 2;
+			matriz->at(iAux).at(jAux).classe = 6;
 		}
-		if ((matriz->at(formigas->i).at(formigas->j) == 5)
-				|| (matriz->at(formigas->i).at(formigas->j) == 3)) {
-			matriz->at(formigas->i).at(formigas->j) = 1; //atualiza o lugar para sem formiga com 1 item
-		} else if ((matriz->at(formigas->i).at(formigas->j) == 2)
-				|| (matriz->at(formigas->i).at(formigas->j) == 4)) {
-			matriz->at(formigas->i).at(formigas->j) = 0; //atualiza o lugar para sem formiga e sem item
+		if ((matriz->at(formiga->i).at(formiga->j).classe == 9)
+				|| (matriz->at(formiga->i).at(formiga->j).classe == 7)) {
+			matriz->at(formiga->i).at(formiga->j).classe = matriz->at(formiga->i).at(formiga->j).temp; //atualiza o lugar para sem formiga com 1 item
+		} else if ((matriz->at(formiga->i).at(formiga->j).classe == 6)
+				|| (matriz->at(formiga->i).at(formiga->j).classe == 8)) {
+			matriz->at(formiga->i).at(formiga->j).classe = 0; //atualiza o lugar para sem formiga e sem item
 		}
-		formigas->j = jAux;
+		formiga->j = jAux;
 		break;
 	case 5:
 		//movimento para inferior esquerdo
+		if (formiga->i == tamMatrizI)
+			iAux = -1;
+		if (formiga->j == 0)
+			jAux = tamMatrizJ+1;
 		iAux++;
 		jAux--;
-		if (formigas->j == 0)
-			jAux = tamMatrizJ;
-		if (formigas->i == tamMatrizI)
-			iAux = 0;
-		if (((matriz->at(iAux).at(jAux) == 2)) || ((matriz->at(iAux).at(jAux) == 3))
-				|| ((matriz->at(iAux).at(jAux) == 4)) || ((matriz->at(iAux).at(jAux) == 5)))
+		matriz->at(iAux).at(jAux).temp = matriz->at(iAux).at(jAux).classe;
+		if (matriz->at(iAux).at(jAux).classe >= 6)
 			break;
-		if ((matriz->at(iAux).at(jAux) == 1) && (formigas->item == 1)) {
+		if ((matriz->at(iAux).at(jAux).classe >= 1) && (formiga->item->classe > 1)) {
 			//atualizar o movimento da formiga segurando item e item em baixo
-			matriz->at(iAux).at(jAux) = 5;
-		} else if ((matriz->at(iAux).at(jAux) == 1) && (formigas->item == 0)) {
+			matriz->at(iAux).at(jAux).classe = 9;
+		} else if ((matriz->at(iAux).at(jAux).classe >= 1)&& (formiga->item->classe == 0)) {
 			//atualizar o movimento da formiga SEM item e item em baixo
-			matriz->at(iAux).at(jAux) = 3;
-		} else if ((matriz->at(iAux).at(jAux) == 0) && (formigas->item == 1)) {
+			matriz->at(iAux).at(jAux).classe = 7;
+		} else if ((matriz->at(iAux).at(jAux).classe == 0) && (formiga->item->classe > 1)) {
 			//atualizar o movimento da formiga segurando item e SEM item em baixo
-			matriz->at(iAux).at(jAux) = 4;
-		} else if ((matriz->at(iAux).at(jAux) == 0) && (formigas->item == 0)) {
+			matriz->at(iAux).at(jAux).classe = 8;
+		} else if ((matriz->at(iAux).at(jAux).classe == 0) && (formiga->item->classe == 0)) {
 			//atualizar o movimento da formiga SEM item e SEM item em baixo
-			matriz->at(iAux).at(jAux) = 2;
+			matriz->at(iAux).at(jAux).classe = 6;
 		}
-		if ((matriz->at(formigas->i).at(formigas->j) == 5)
-				|| (matriz->at(formigas->i).at(formigas->j) == 3)) {
-			matriz->at(formigas->i).at(formigas->j) = 1; //atualiza o lugar para sem formiga com 1 item
-		} else if ((matriz->at(formigas->i).at(formigas->j) == 2)
-				|| (matriz->at(formigas->i).at(formigas->j) == 4)) {
-			matriz->at(formigas->i).at(formigas->j) = 0; //atualiza o lugar para sem formiga e sem item
+		if ((matriz->at(formiga->i).at(formiga->j).classe == 9)
+				|| (matriz->at(formiga->i).at(formiga->j).classe == 7)) {
+			matriz->at(formiga->i).at(formiga->j).classe = matriz->at(formiga->i).at(formiga->j).temp; //atualiza o lugar para sem formiga com 1 item
+		} else if ((matriz->at(formiga->i).at(formiga->j).classe == 6)
+				|| (matriz->at(formiga->i).at(formiga->j).classe == 8)) {
+			matriz->at(formiga->i).at(formiga->j).classe = 0; //atualiza o lugar para sem formiga e sem item
 		}
-		formigas->i = iAux;
-		formigas->j = jAux;
+		formiga->i = iAux;
+		formiga->j = jAux;
 		break;
 	case 6:
 		//movimento para baixo
+		if (formiga->i == tamMatrizI)
+			iAux = -1;
 		iAux++;
-		if (formigas->i == tamMatrizI)
-			iAux = 0;
-		if (((matriz->at(iAux).at(jAux) == 2)) || ((matriz->at(iAux).at(jAux) == 3))
-				|| ((matriz->at(iAux).at(jAux) == 4)) || ((matriz->at(iAux).at(jAux) == 5)))
+		matriz->at(iAux).at(jAux).temp = matriz->at(iAux).at(jAux).classe;
+		if (matriz->at(iAux).at(jAux).classe >= 6)
 			break;
-		if ((matriz->at(iAux).at(jAux) == 1) && (formigas->item == 1)) {
+		if ((matriz->at(iAux).at(jAux).classe >= 1) && (formiga->item->classe > 1)) {
 			//atualizar o movimento da formiga segurando item e item em baixo
-			matriz->at(iAux).at(jAux) = 5;
-		} else if ((matriz->at(iAux).at(jAux) == 1) && (formigas->item == 0)) {
+			matriz->at(iAux).at(jAux).classe = 9;
+		} else if ((matriz->at(iAux).at(jAux).classe >= 1)&& (formiga->item->classe == 0)) {
 			//atualizar o movimento da formiga SEM item e item em baixo
-			matriz->at(iAux).at(jAux) = 3;
-		} else if ((matriz->at(iAux).at(jAux) == 0) && (formigas->item == 1)) {
+			matriz->at(iAux).at(jAux).classe = 7;
+		} else if ((matriz->at(iAux).at(jAux).classe == 0) && (formiga->item->classe > 1)) {
 			//atualizar o movimento da formiga segurando item e SEM item em baixo
-			matriz->at(iAux).at(jAux) = 4;
-		} else if ((matriz->at(iAux).at(jAux) == 0) && (formigas->item == 0)) {
+			matriz->at(iAux).at(jAux).classe = 8;
+		} else if ((matriz->at(iAux).at(jAux).classe == 0) && (formiga->item->classe == 0)) {
 			//atualizar o movimento da formiga SEM item e SEM item em baixo
-			matriz->at(iAux).at(jAux) = 2;
+			matriz->at(iAux).at(jAux).classe = 6;
 		}
-		if ((matriz->at(formigas->i).at(formigas->j) == 5)
-				|| (matriz->at(formigas->i).at(formigas->j) == 3)) {
-			matriz->at(formigas->i).at(formigas->j) = 1; //atualiza o lugar para sem formiga com 1 item
-		} else if ((matriz->at(formigas->i).at(formigas->j) == 2)
-				|| (matriz->at(formigas->i).at(formigas->j) == 4)) {
-			matriz->at(formigas->i).at(formigas->j) = 0; //atualiza o lugar para sem formiga e sem item
+		if ((matriz->at(formiga->i).at(formiga->j).classe == 9)
+				|| (matriz->at(formiga->i).at(formiga->j).classe == 7)) {
+			matriz->at(formiga->i).at(formiga->j).classe = matriz->at(formiga->i).at(formiga->j).temp; //atualiza o lugar para sem formiga com 1 item
+		} else if ((matriz->at(formiga->i).at(formiga->j).classe == 6)
+				|| (matriz->at(formiga->i).at(formiga->j).classe == 8)) {
+			matriz->at(formiga->i).at(formiga->j).classe = 0; //atualiza o lugar para sem formiga e sem item
 		}
-		formigas->i = iAux;
+		formiga->i = iAux;
 		break;
 	case 7:
 		//movimento para inferior direito
+		if (formiga->i == tamMatrizI)
+			iAux = -1;
+		if (formiga->j == tamMatrizJ)
+			jAux = -1;
 		iAux++;
 		jAux++;
-		if (formigas->i == tamMatrizI)
-			iAux = 0;
-		if (formigas->j == tamMatrizJ)
-			jAux = 0;
-		if (((matriz->at(iAux).at(jAux) == 2)) || ((matriz->at(iAux).at(jAux) == 3))
-				|| ((matriz->at(iAux).at(jAux) == 4)) || ((matriz->at(iAux).at(jAux) == 5)))
+		matriz->at(iAux).at(jAux).temp = matriz->at(iAux).at(jAux).classe;
+		if (matriz->at(iAux).at(jAux).classe >= 6)
 			break;
-		if ((matriz->at(iAux).at(jAux) == 1) && (formigas->item == 1)) {
+		if ((matriz->at(iAux).at(jAux).classe >= 1) && (formiga->item->classe > 1)) {
 			//atualizar o movimento da formiga segurando item e item em baixo
-			matriz->at(iAux).at(jAux) = 5;
-		} else if ((matriz->at(iAux).at(jAux) == 1) && (formigas->item == 0)) {
+			matriz->at(iAux).at(jAux).classe = 9;
+		} else if ((matriz->at(iAux).at(jAux).classe >= 1)&& (formiga->item->classe == 0)) {
 			//atualizar o movimento da formiga SEM item e item em baixo
-			matriz->at(iAux).at(jAux) = 3;
-		} else if ((matriz->at(iAux).at(jAux) == 0) && (formigas->item == 1)) {
+			matriz->at(iAux).at(jAux).classe = 7;
+		} else if ((matriz->at(iAux).at(jAux).classe == 0) && (formiga->item->classe > 1)) {
 			//atualizar o movimento da formiga segurando item e SEM item em baixo
-			matriz->at(iAux).at(jAux) = 4;
-		} else if ((matriz->at(iAux).at(jAux) == 0) && (formigas->item == 0)) {
+			matriz->at(iAux).at(jAux).classe = 8;
+		} else if ((matriz->at(iAux).at(jAux).classe == 0) && (formiga->item->classe == 0)) {
 			//atualizar o movimento da formiga SEM item e SEM item em baixo
-			matriz->at(iAux).at(jAux) = 2;
+			matriz->at(iAux).at(jAux).classe = 6;
 		}
-		if ((matriz->at(formigas->i).at(formigas->j) == 5)
-				|| (matriz->at(formigas->i).at(formigas->j) == 3)) {
-			matriz->at(formigas->i).at(formigas->j) = 1; //atualiza o lugar para sem formiga com 1 item
-		} else if ((matriz->at(formigas->i).at(formigas->j) == 2)
-				|| (matriz->at(formigas->i).at(formigas->j) == 4)) {
-			matriz->at(formigas->i).at(formigas->j) = 0; //atualiza o lugar para sem formiga e sem item
+		if ((matriz->at(formiga->i).at(formiga->j).classe == 9)
+				|| (matriz->at(formiga->i).at(formiga->j).classe == 7)) {
+			matriz->at(formiga->i).at(formiga->j).classe = matriz->at(formiga->i).at(formiga->j).temp; //atualiza o lugar para sem formiga com 1 item
+		} else if ((matriz->at(formiga->i).at(formiga->j).classe == 6)
+				|| (matriz->at(formiga->i).at(formiga->j).classe == 8)) {
+			matriz->at(formiga->i).at(formiga->j).classe = 0; //atualiza o lugar para sem formiga e sem item
 		}
-		formigas->i = iAux;
-		formigas->j = jAux;
+		formiga->i = iAux;
+		formiga->j = jAux;
 		break;
 	default:
 		break;
