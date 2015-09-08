@@ -13,10 +13,10 @@
 #include <string>
 #include <unistd.h>
 #include "main-priv.hpp"
-#include "graphicInterface.hpp"
+//#include "graphicInterface.hpp"
 #include "grid.hpp"
 #include "ant.hpp"
-#define TEMPO 90000
+#define TEMPO 500000
 using namespace std;
 
 #endif /* MAIN_H_ */

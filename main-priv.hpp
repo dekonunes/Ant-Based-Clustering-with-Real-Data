@@ -10,22 +10,7 @@
 
 using namespace std;
 
-typedef struct item {
-	double number1;
-	double number2;
-	double number3;
-	double number4;
-	double classe;
-	double temp;
-} item, *pitem;
 
-struct formiga {
-	pitem item; //0 não contem item, 1 contem item
-	int i; //local da formiga em i
-	int j; //local da formiga em j
-	int raio;
-	float tamVisao;
-};
 
 
 

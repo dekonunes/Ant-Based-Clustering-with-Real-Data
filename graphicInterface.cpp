@@ -69,14 +69,19 @@ void update(vector<vector<item> > *matriz, vector<formiga> *formigas, int qtdFor
 	window->display();
 }
 
-void updateFinal(vector<vector<item> > *matriz, formiga *formigas, int qtdFormigas, int tamMatrizI, int tamMatrizJ,
+void updateFinal(vector<vector<item> > *matriz, formiga *formiga, int qtdFormigas, int tamMatrizI, int tamMatrizJ,
 		sf::RenderWindow *window, std::vector<std::vector<sf::RectangleShape> > *grid) {
-	lastMotionAnt(matriz, formigas, qtdFormigas, tamMatrizI, tamMatrizJ);
-	updateColor(matriz, formigas, qtdFormigas, tamMatrizI, tamMatrizJ, grid);
-	for (int i = 0; i < tamMatrizI; i++)
-		for (int j = 0; j < tamMatrizJ; j++)
-			window->draw(grid->at(i).at(j));
-	window->display();
+	for (int i = 0; i < qtdFormigas; i++) {
+		while (formiga->item->classe >= 1) {
+			motionAnt(matriz, formiga, qtdFormigas, tamMatrizI, tamMatrizJ);
+
+			updateColor(matriz, formiga, qtdFormigas, tamMatrizI, tamMatrizJ, grid);
+			for (int i = 0; i < tamMatrizI; i++)
+				for (int j = 0; j < tamMatrizJ; j++)
+					window->draw(grid->at(i).at(j));
+			window->display();
+		}
+	}
 }
 
 void updateColor(vector<vector<item> > *matriz, formiga *formigas, int qtdFormigas, int tamMatrizI, int tamMatrizJ,
@@ -119,5 +124,4 @@ void updateColor(vector<vector<item> > *matriz, formiga *formigas, int qtdFormig
 		}
 	}
 }
-
 
