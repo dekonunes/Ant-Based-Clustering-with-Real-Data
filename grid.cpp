@@ -87,7 +87,7 @@ void populateItemsGrid(vector<vector<item> > *matriz, int tamMatrizI, int tamMat
 	double aux;
 	vector<vector<double> > itens;
 	char c;
-	FILE *file = fopen("Square1_DataSet_400itens4.txt", "r");
+	FILE *file = fopen("Square1_DataSet_400itens.txt", "r");
 	if (file == NULL)
 		exit(EXIT_FAILURE);
 

@@ -19,28 +19,30 @@ int main(int argc, char *argv[]) {
 	populateItemsGrid(&matriz, tamMatrizI, tamMatrizJ);
 	populateAnts(&matriz, &formigas, qtdFormigas, raio, tamMatrizI, tamMatrizJ);
 	showGrid(&matriz, tamMatrizI, tamMatrizJ);
-	for (int var = 0; var < qtdLoop; ++var) {
+	/*for (int var = 0; var < qtdLoop; ++var) {
 		for (int var2 = 0; var2 < qtdFormigas; ++var2) {
 			motionAnt(&matriz, &formigas.at(var2), tamMatrizI, tamMatrizJ);
-			usleep(TEMPO);
+			//usleep(TEMPO);
 			//getchar();
-			if (system("CLS")) 	system("clear");
-			showGrid(&matriz, tamMatrizI, tamMatrizJ);
-			cout << formigas.at(0).item.number1 << endl;
+			//if (system("CLS")) 	system("clear");
+			//showGrid(&matriz, tamMatrizI, tamMatrizJ);
 		}
 	}
-
+	
 	for (int i = 0; i < qtdFormigas; i++) {
 		while (formigas.at(i).item.classe != 0) {
 			motionAnt(&matriz, &formigas.at(i), tamMatrizI, tamMatrizJ);
-			usleep(TEMPO);
+			
+		}
+		usleep(TEMPO);
+			//getchar();
 			if (system("CLS")) 	system("clear");
 			showGrid(&matriz, tamMatrizI, tamMatrizJ);
-		}
-	}
-	//interfaceGrafica(&matriz, &formigas, qtdFormigas, tamMatrizI, tamMatrizJ, qtdLoop);
+	}*/
+	interfaceGrafica(&matriz, &formigas, qtdFormigas, tamMatrizI, tamMatrizJ, qtdLoop);
 	//usleep(80000000);
 	cout << "-------------------------------" << endl;
 	showGrid(&matriz, tamMatrizI, tamMatrizJ);
+	getchar();
 	return 0;
 }

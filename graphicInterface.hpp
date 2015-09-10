@@ -11,7 +11,7 @@
 #include "main-priv.hpp"
 #include "ant.hpp"
 #include <SFML/Graphics.hpp>
-#define resolucao 640
+#define resolucao 800
 using namespace std;
 
 void interfaceGrafica(vector<vector<item> > *, vector<formiga> *, int, int, int, int);

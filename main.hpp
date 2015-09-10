@@ -16,7 +16,8 @@
 //#include "graphicInterface.hpp"
 #include "grid.hpp"
 #include "ant.hpp"
-#define TEMPO 500000
+ #include "graphicInterface.hpp"
+#define TEMPO 50000
 using namespace std;
 
 #endif /* MAIN_H_ */
