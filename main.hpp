@@ -12,8 +12,6 @@
 #include <vector>
 #include <string>
 #include <unistd.h>
-#include "main-priv.hpp"
-//#include "graphicInterface.hpp"
 #include "grid.hpp"
 #include "ant.hpp"
  #include "graphicInterface.hpp"
