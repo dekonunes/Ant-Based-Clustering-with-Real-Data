@@ -8,7 +8,6 @@
 #ifndef SRC_ANT_BASED_CLUSTERING_WITH_REAL_DATA_GRID_HPP_
 #define SRC_ANT_BASED_CLUSTERING_WITH_REAL_DATA_GRID_HPP_
 
-#include "main-priv.hpp"
 #include "ant.hpp"
 #include <vector>
 #include <iostream>

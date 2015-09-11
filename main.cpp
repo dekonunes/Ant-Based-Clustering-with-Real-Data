@@ -27,8 +27,8 @@ int main(int argc, char *argv[]) {
 			//if (system("CLS")) 	system("clear");
 			//showGrid(&matriz, tamMatrizI, tamMatrizJ);
 		}
-	}
-	
+	}*/
+	/*
 	for (int i = 0; i < qtdFormigas; i++) {
 		while (formigas.at(i).item.classe != 0) {
 			motionAnt(&matriz, &formigas.at(i), tamMatrizI, tamMatrizJ);

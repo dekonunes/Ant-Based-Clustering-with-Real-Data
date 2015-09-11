@@ -73,10 +73,6 @@ void populateAnts(vector<vector<item> > *matriz, vector<formiga> *formigas, int 
 		if (matriz->at(formiga.i).at(formiga.j).classe == 0) {
 			matriz->at(formiga.i).at(formiga.j).classe = 6;
 			formigas->push_back(formiga);
-		} else if ((matriz->at(formiga.i).at(formiga.j).classe >= 1)
-				&& (matriz->at(formiga.i).at(formiga.j).classe < 6)) {
-			matriz->at(formiga.i).at(formiga.j).classe = 7;
-			formigas->push_back(formiga);
 		} else
 			var--;
 	}
@@ -87,7 +83,7 @@ void populateItemsGrid(vector<vector<item> > *matriz, int tamMatrizI, int tamMat
 	double aux;
 	vector<vector<double> > itens;
 	char c;
-	FILE *file = fopen("Square1_DataSet_400itens.txt", "r");
+	FILE *file = fopen("DataSet_150items_4Dime.txt", "r");
 	if (file == NULL)
 		exit(EXIT_FAILURE);
 

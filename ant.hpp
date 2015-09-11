@@ -8,7 +8,6 @@
 #ifndef SRC_ANT_BASED_CLUSTERING_WITH_REAL_DATA_ANT_HPP_
 #define SRC_ANT_BASED_CLUSTERING_WITH_REAL_DATA_ANT_HPP_
 
-#include "main-priv.hpp"
 #include <vector>
 #include <iostream>
 #include <cstdlib>
@@ -42,6 +41,6 @@ void viewAnt(vector<vector<item> >, formiga *, int, int);
 void probabilityGetItem(vector<vector<item> > *, formiga *, double);
 void probabilityDropItem(vector<vector<item> > *, formiga *, double);
 void motionAnt(vector<vector<item> > *, formiga *, int, int);
-double euclideanDistance(item, formiga *, int);
+double euclideanDistance(item, item, int);
 
 #endif /* SRC_ANT_BASED_CLUSTERING_WITH_REAL_DATA_ANT_HPP_ */
