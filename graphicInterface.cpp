@@ -7,7 +7,7 @@
 #include "graphicInterface.hpp"
 
 void interfaceGrafica(vector<vector<item> > *matriz, vector<formiga> *formigas, int qtdFormigas, int tamMatrizI,
-		int tamMatrizJ, int qtdLoop) {
+		int tamMatrizJ, int qtdLoop, normalDim normalDim) {
 	bool flag;
 	sf::RenderWindow *window;
 	std::vector<std::vector<sf::RectangleShape> > grid;
@@ -35,7 +35,8 @@ void interfaceGrafica(vector<vector<item> > *matriz, vector<formiga> *formigas, 
 
 	for (int i = 0; i < qtdLoop; ++i) {
 
-		update(matriz, formigas, qtdFormigas, tamMatrizI, tamMatrizJ, window, &grid);
+		update(matriz, formigas, qtdFormigas, tamMatrizI, tamMatrizJ, window, &grid, normalDim);
+		getchar();
 		//if (i == 1)
 		//usleep(10000000);
 	}
@@ -60,59 +61,62 @@ void interfaceGrafica(vector<vector<item> > *matriz, vector<formiga> *formigas, 
 	 formigas->at(i).j).number4Past;
 	 }
 	 }*/
-	updateFinal(matriz, formigas, qtdFormigas, tamMatrizI, tamMatrizJ, window, &grid); //para não deixar nenhuma formiga carregando quando termina
+	updateFinal(matriz, formigas, qtdFormigas, tamMatrizI, tamMatrizJ, window, &grid, normalDim); //para não deixar nenhuma formiga carregando quando termina
 
 }
 
 void update(vector<vector<item> > *matriz, vector<formiga> *formigas, int qtdFormigas, int tamMatrizI, int tamMatrizJ,
-		sf::RenderWindow *window, std::vector<std::vector<sf::RectangleShape> > *grid) {
+		sf::RenderWindow *window, std::vector<std::vector<sf::RectangleShape> > *grid, normalDim normalDim) {
 	for (int i = 0; i < qtdFormigas; i++) {
-		motionAnt(matriz, &formigas->at(i), tamMatrizI, tamMatrizJ);
-		//updateColor(matriz, tamMatrizI, tamMatrizJ, grid);
+		motionAnt(matriz, &formigas->at(i), tamMatrizI, tamMatrizJ, normalDim);
+		updateColor(matriz, tamMatrizI, tamMatrizJ, grid);
+
 	}
-	/*
+
 	for (int i = 0; i < tamMatrizI; i++)
 		for (int j = 0; j < tamMatrizJ; j++)
 			window->draw(grid->at(i).at(j));
-	window->display();*/
+	window->display();
+	getchar();
 }
 
 void updateFinal(vector<vector<item> > *matriz, vector<formiga> *formigas, int qtdFormigas, int tamMatrizI,
-		int tamMatrizJ, sf::RenderWindow *window, std::vector<std::vector<sf::RectangleShape> > *grid) {
-	/*for (int i = 0; i < qtdFormigas; i++) {
+		int tamMatrizJ, sf::RenderWindow *window, std::vector<std::vector<sf::RectangleShape> > *grid,
+		normalDim normalDim) {
+	for (int i = 0; i < qtdFormigas; i++) {
 		while (formigas->at(i).item.classe != 0) {
 			//cout << "formig" << formigas->at(i).item.classe << endl;
 			//cout << "map" << matriz->at(formigas->at(i).i).at(formigas->at(i).j).classe << endl;
-			motionAnt(matriz, &formigas->at(i), tamMatrizI, tamMatrizJ);
+			motionAnt(matriz, &formigas->at(i), tamMatrizI, tamMatrizJ, normalDim);
 
 		}
 		if (matriz->at(formigas->at(i).i).at(formigas->at(i).j).classe == 6) {
-		 matriz->at(formigas->at(i).i).at(formigas->at(i).j).classe = 0;
-		 matriz->at(formigas->at(i).i).at(formigas->at(i).j).number1 = 0;
-		 matriz->at(formigas->at(i).i).at(formigas->at(i).j).number2 = 0;
-		 matriz->at(formigas->at(i).i).at(formigas->at(i).j).number3 = 0;
-		 matriz->at(formigas->at(i).i).at(formigas->at(i).j).number4 = 0;
-		 }
-		 if (matriz->at(formigas->at(i).i).at(formigas->at(i).j).classe == 7) {
-		 matriz->at(formigas->at(i).i).at(formigas->at(i).j).classe = matriz->at(formigas->at(i).i).at(
-		 formigas->at(i).j).classePast;
-		 matriz->at(formigas->at(i).i).at(formigas->at(i).j).number1 = matriz->at(formigas->at(i).i).at(
-		 formigas->at(i).j).number1Past;
-		 matriz->at(formigas->at(i).i).at(formigas->at(i).j).number2 = matriz->at(formigas->at(i).i).at(
-		 formigas->at(i).j).number2Past;
-		 matriz->at(formigas->at(i).i).at(formigas->at(i).j).number3 = matriz->at(formigas->at(i).i).at(
-		 formigas->at(i).j).number3Past;
-		 matriz->at(formigas->at(i).i).at(formigas->at(i).j).number4 = matriz->at(formigas->at(i).i).at(
-		 formigas->at(i).j).number4Past;
-		 }
+			matriz->at(formigas->at(i).i).at(formigas->at(i).j).classe = 0;
+			matriz->at(formigas->at(i).i).at(formigas->at(i).j).number1 = 0;
+			matriz->at(formigas->at(i).i).at(formigas->at(i).j).number2 = 0;
+			matriz->at(formigas->at(i).i).at(formigas->at(i).j).number3 = 0;
+			matriz->at(formigas->at(i).i).at(formigas->at(i).j).number4 = 0;
+		}
+		if (matriz->at(formigas->at(i).i).at(formigas->at(i).j).classe == 7) {
+			matriz->at(formigas->at(i).i).at(formigas->at(i).j).classe = matriz->at(formigas->at(i).i).at(
+					formigas->at(i).j).classePast;
+			matriz->at(formigas->at(i).i).at(formigas->at(i).j).number1 = matriz->at(formigas->at(i).i).at(
+					formigas->at(i).j).number1Past;
+			matriz->at(formigas->at(i).i).at(formigas->at(i).j).number2 = matriz->at(formigas->at(i).i).at(
+					formigas->at(i).j).number2Past;
+			matriz->at(formigas->at(i).i).at(formigas->at(i).j).number3 = matriz->at(formigas->at(i).i).at(
+					formigas->at(i).j).number3Past;
+			matriz->at(formigas->at(i).i).at(formigas->at(i).j).number4 = matriz->at(formigas->at(i).i).at(
+					formigas->at(i).j).number4Past;
+		}
 
-	}*/
+	}
 	updateColor(matriz, tamMatrizI, tamMatrizJ, grid);
 	for (int i = 0; i < tamMatrizI; i++)
 		for (int j = 0; j < tamMatrizJ; j++)
 			window->draw(grid->at(i).at(j));
 	window->display();
-
+	getchar();
 }
 
 void updateColor(vector<vector<item> > *matriz, int tamMatrizI, int tamMatrizJ,
@@ -144,7 +148,7 @@ void updateColor(vector<vector<item> > *matriz, int tamMatrizI, int tamMatrizJ,
 				grid->at(i).at(j).setFillColor(sf::Color(sf::Color(0, 0, 155)));
 			} else if ((matriz->at(i).at(j).classe == 4)) {
 				flag = true;
-				grid->at(i).at(j).setFillColor(sf::Color(sf::Color(0, 155, 0)));
+				grid->at(i).at(j).setFillColor(sf::Color(sf::Color(0, 100, 0)));
 			}
 			if (!flag) {
 				if (matriz->at(i).at(j).classe == 0)

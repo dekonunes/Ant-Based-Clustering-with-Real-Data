@@ -51,10 +51,6 @@ void showGrid(vector<vector<item> > *matriz, int tamMatrizI, int tamMatrizJ) {
 	}
 }
 
-void populateAnts2(vector<formiga> *formigas, int qtdFormigas) {
-
-}
-
 void populateAnts(vector<vector<item> > *matriz, vector<formiga> *formigas, int qtdFormigas, int raio, int tamMatrizI,
 		int tamMatrizJ) {
 	formiga formiga;
@@ -78,12 +74,14 @@ void populateAnts(vector<vector<item> > *matriz, vector<formiga> *formigas, int 
 	}
 }
 
-void populateItemsGrid(vector<vector<item> > *matriz, int tamMatrizI, int tamMatrizJ) {
+void populateItemsGrid(vector<vector<item> > *matriz, int tamMatrizI, int tamMatrizJ, normalDim *normalDim) {
 	int i, j, lines = 0, linesAux = 0, dimension = -1, flag = 0;
 	double aux;
 	vector<vector<double> > itens;
 	char c;
 	FILE *file = fopen("DataSet_150items_4Dime.txt", "r");
+	//FILE *file = fopen("Square1_DataSet.txt", "r");
+
 	if (file == NULL)
 		exit(EXIT_FAILURE);
 
@@ -103,7 +101,6 @@ void populateItemsGrid(vector<vector<item> > *matriz, int tamMatrizI, int tamMat
 		flag = 1;
 		lines++;
 	}
-
 	for (int var = 0; var < lines; ++var) {
 		i = rand() % tamMatrizI;
 		j = rand() % tamMatrizJ;
@@ -141,5 +138,30 @@ void populateItemsGrid(vector<vector<item> > *matriz, int tamMatrizI, int tamMat
 			var--;
 
 	}
+	normalDim->normal = (normaliza(&itens, dimension, linesAux) -1);
+	normalDim->dimension = dimension;
 	fclose(file);
+}
+
+double normaliza(vector<vector<double> > *itens, int dimension, int qtdItens) {
+	double maior = -9999999;
+	double menor = 9999999;
+	double tmp = 0.0;
+	vector<double> vet;
+	for (int i = 0; i < dimension; i++) {
+		for (unsigned int j = 0; j < itens->size(); j++) {
+			tmp = itens->at(j).at(i);
+			if (tmp > maior)
+				maior = tmp;
+			if (tmp < menor)
+				menor = tmp;
+		}
+		vet.push_back(maior - menor);
+		cout << "maior" << maior << endl;
+		cout << "menor" << menor << endl;
+	}
+	double soma = 0;
+	for (unsigned int i = 0; i < vet.size(); i++)
+		soma += pow(vet[i], 2);
+	return sqrt(soma);
 }

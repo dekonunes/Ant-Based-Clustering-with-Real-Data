@@ -14,7 +14,10 @@
 #include <ctime>
 #include <cstring>
 #include <math.h>
+#include "grid.hpp"
 using namespace std;
+
+struct normalDim;
 
 struct item {
 	double number1;
@@ -37,10 +40,11 @@ struct formiga {
 	float tamVisao;
 };
 
-void viewAnt(vector<vector<item> >, formiga *, int, int);
+void viewAnt(vector<vector<item> >, formiga *, int, int, normalDim);
 void probabilityGetItem(vector<vector<item> > *, formiga *, double);
 void probabilityDropItem(vector<vector<item> > *, formiga *, double);
-void motionAnt(vector<vector<item> > *, formiga *, int, int);
-double euclideanDistance(item, item, int);
+void motionAnt(vector<vector<item> > *, formiga *, int, int, normalDim);
+double euclideanDistance(item, item, normalDim);
+
 
 #endif /* SRC_ANT_BASED_CLUSTERING_WITH_REAL_DATA_ANT_HPP_ */

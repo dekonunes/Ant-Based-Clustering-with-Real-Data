@@ -6,10 +6,10 @@
  */
 #include "ant.hpp"
 
-void viewAnt(vector<vector<item> > *matriz, formiga *formiga, int tamMatrizI, int tamMatrizJ) {
+void viewAnt(vector<vector<item> > *matriz, formiga *formiga, int tamMatrizI, int tamMatrizJ, normalDim normalDim) {
 	int iAux = 0, jAux = 0, linhasMatriz = 3, aux1 = 0, aux2 = 0, aux3 = 0, aux4 = 0, aux5 = 0;
 	int qtdItensigual = 0;
-	double qtdItensRedor = 0, alpha = 0.49, probability = 0.0, k1, k2;
+	double qtdItensRedor = 0, alpha = 0.5, probability = 0.0, k1, k2;
 	iAux = formiga->i - 1;
 	jAux = formiga->j - 1;
 	tamMatrizI--;
@@ -17,7 +17,6 @@ void viewAnt(vector<vector<item> > *matriz, formiga *formiga, int tamMatrizI, in
 	/*s = 1.0
 	 / ((((2 * formiga->raio + 1) * (2 * formiga->raio + 1)-1))
 	 * (((2 * formiga->raio + 1) * (2 * formiga->raio + 1))-1));*/
-
 	for (int var2 = 1; var2 < formiga->raio + 1; var2++) {
 		linhasMatriz = (var2 * 2 + 1);
 		for (int var3 = 0; var3 < linhasMatriz; var3++) {
@@ -31,12 +30,12 @@ void viewAnt(vector<vector<item> > *matriz, formiga *formiga, int tamMatrizI, in
 				jAux = 0;
 			if ((matriz->at(iAux).at(jAux).classe > 0) && (matriz->at(iAux).at(jAux).classe < 6)) {
 				if (formiga->item.classe >= 1) {
-					probability += (1 - (euclideanDistance(matriz->at(iAux).at(jAux), formiga->item, 4) / alpha));
+					probability +=
+							(1 - (euclideanDistance(matriz->at(iAux).at(jAux), formiga->item, normalDim) / alpha));
 
 				} else {
-					probability += (1
-							- (euclideanDistance(matriz->at(iAux).at(jAux), matriz->at(formiga->i).at(formiga->j), 4)
-									/ alpha));
+					probability +=
+							(1 - (euclideanDistance(matriz->at(iAux).at(jAux), formiga->item, normalDim) / alpha));
 				}
 				qtdItensRedor++;
 				if (formiga->item.classe == matriz->at(iAux).at(jAux).classe)
@@ -62,11 +61,11 @@ void viewAnt(vector<vector<item> > *matriz, formiga *formiga, int tamMatrizI, in
 			}
 			if ((matriz->at(iAux).at(jAux).classe > 0) && (matriz->at(iAux).at(jAux).classe < 6)) {
 				if (formiga->item.classe >= 1) {
-					probability += (1 - (euclideanDistance(matriz->at(iAux).at(jAux), formiga->item, 4) / alpha));
+					probability +=
+							(1 - (euclideanDistance(matriz->at(iAux).at(jAux), formiga->item, normalDim) / alpha));
 				} else {
-					probability += (1
-							- (euclideanDistance(matriz->at(iAux).at(jAux), matriz->at(formiga->i).at(formiga->j), 4)
-									/ alpha));
+					probability +=
+							(1 - (euclideanDistance(matriz->at(iAux).at(jAux), formiga->item, normalDim) / alpha));
 				}
 				if (formiga->item.classe == matriz->at(iAux).at(jAux).classe)
 					qtdItensigual++;
@@ -88,11 +87,11 @@ void viewAnt(vector<vector<item> > *matriz, formiga *formiga, int tamMatrizI, in
 				jAux = 0;
 			if ((matriz->at(iAux).at(jAux).classe > 0) && (matriz->at(iAux).at(jAux).classe < 6)) {
 				if (formiga->item.classe >= 1) {
-					probability += (1 - (euclideanDistance(matriz->at(iAux).at(jAux), formiga->item, 4) / alpha));
+					probability +=
+							(1 - (euclideanDistance(matriz->at(iAux).at(jAux), formiga->item, normalDim) / alpha));
 				} else {
-					probability += (1
-							- (euclideanDistance(matriz->at(iAux).at(jAux), matriz->at(formiga->i).at(formiga->j), 4)
-									/ alpha));
+					probability +=
+							(1 - (euclideanDistance(matriz->at(iAux).at(jAux), formiga->item, normalDim) / alpha));
 				}
 				if (formiga->item.classe == matriz->at(iAux).at(jAux).classe)
 					qtdItensigual++;
@@ -114,11 +113,11 @@ void viewAnt(vector<vector<item> > *matriz, formiga *formiga, int tamMatrizI, in
 			}
 			if ((matriz->at(iAux).at(jAux).classe > 0) && (matriz->at(iAux).at(jAux).classe < 6)) {
 				if (formiga->item.classe >= 1) {
-					probability += (1 - (euclideanDistance(matriz->at(iAux).at(jAux), formiga->item, 4) / alpha));
+					probability +=
+							(1 - (euclideanDistance(matriz->at(iAux).at(jAux), formiga->item, normalDim) / alpha));
 				} else {
-					probability += (1
-							- (euclideanDistance(matriz->at(iAux).at(jAux), matriz->at(formiga->i).at(formiga->j), 4)
-									/ alpha));
+					probability +=
+							(1 - (euclideanDistance(matriz->at(iAux).at(jAux), formiga->item, normalDim) / alpha));
 				}
 				if (formiga->item.classe == matriz->at(iAux).at(jAux).classe)
 					qtdItensigual++;
@@ -202,78 +201,29 @@ void probabilityDropItem(vector<vector<item> > *matriz, formiga *formiga, double
 	}
 }
 
-double euclideanDistance(item item1, item item2, int dimension) {
-	double aux = 0, number1, number2, number3, number4; //,max = 0.0,min = 5000.0;
-	number1 = item2.number1 / item1.number1;
-	if (number1 < 0)
-		number1 = 0;
-	if (number1 > 1)
-		number1 = 1;
-	//cout << "othe1r" << number1 << endl;
-	number2 = item2.number2 / item1.number2;
-	if (number2 < 0)
-		number2 = 0;
-	if (number2 > 1)
-		number2 = 1;
-	//cout << "othe2r" << number2 << endl;
-	number3 = item2.number3 / item1.number3;
-	if (number3 < 0)
-		number3 = 0;
-	if (number3 > 1)
-		number3 = 1;
-	//cout << "othe3r" << number3 << endl;
-	number4 = item2.number4 / item1.number4;
-	if (number4 < 0)
-		number4 = 0;
-	if (number4 > 1)
-		number4 = 1;
-	//cout << "othe4r" << number4 << endl;
-	//-----------------------------
-	item2.number1 = item1.number1 / item2.number1;
-	if (item2.number1 < 0)
-		item2.number1 = 0;
-	if (item2.number1 > 1)
-		item2.number1 = 1;
-	//cout << "ite1m" << item2.number1 << endl;
-	item2.number2 = item1.number2 / item2.number2;
-	if (item2.number2 < 0)
-		item2.number2 = 0;
-	if (item2.number2 > 1)
-		item2.number2 = 1;
-	//cout << "ite2m" << item2.number2 << endl;
-	item2.number3 = item1.number3 / item2.number3;
-	if (item2.number3 < 0)
-		item2.number3 = 0;
-	if (item2.number3 > 1)
-		item2.number3 = 1;
-	//cout << "ite3m" << item2.number3 << endl;
-	item2.number4 = item1.number4 / item2.number4;
-	if (item2.number4 < 0)
-		item2.number4 = 0;
-	if (item2.number4 > 1)
-		item2.number4 = 1;
-	//cout << "ite4m" << item2.number4 << endl;
-	switch (dimension) {
+double euclideanDistance(item item1, item item2, normalDim normalDim) {
+	double aux = 0; //,max = 0.0,min = 5000.0;
+	//cout << normalDim.dimension << "dim e normal" << normalDim.normal << endl;
+	switch (normalDim.dimension) {
 	case 1:
-		return sqrt(pow(number1 - item2.number1, 2));
+		return sqrt(pow((item1.number1 / normalDim.normal) - (item2.number1 / normalDim.normal), 2));
 		break;
 	case 2:
-		aux = (number1 - item2.number1) * (number1 - item2.number1);
-		aux += (number2 - item2.number2) * (number2 - item2.number2);
+		aux = pow((item1.number1 / normalDim.normal) - (item2.number1 / normalDim.normal), 2);
+		aux += pow((item1.number2 / normalDim.normal) - (item2.number2 / normalDim.normal), 2);
 		return sqrt(aux);
 		break;
 	case 3:
-		aux = pow(number1 - item2.number1, 2);
-		aux += pow(number2 - item2.number2, 2);
-		aux += pow(number3 - item2.number3, 2);
+		aux = pow((item1.number1 / normalDim.normal) - (item2.number1 / normalDim.normal), 2);
+		aux += pow((item1.number2 / normalDim.normal) - (item2.number2 / normalDim.normal), 2);
+		aux += pow((item1.number3 / normalDim.normal) - (item2.number3 / normalDim.normal), 2);
 		return sqrt(aux);
 		break;
 	case 4:
-		aux = pow(number1 - item2.number1, 2);
-		aux += pow(number2 - item2.number2, 2);
-		aux += pow(number3 - item2.number3, 2);
-		aux += pow(number4 - item2.number4, 2);
-		//cout << "dist: " << sqrt(aux) << endl;
+		aux = pow((item1.number1 / normalDim.normal) - (item2.number1 / normalDim.normal), 2);
+		aux += pow((item1.number2 / normalDim.normal) - (item2.number2 / normalDim.normal), 2);
+		aux += pow((item1.number3 / normalDim.normal) - (item2.number3 / normalDim.normal), 2);
+		aux += pow((item1.number4 / normalDim.normal) - (item2.number4 / normalDim.normal), 2);
 		return sqrt(aux);
 		break;
 	default:
@@ -282,10 +232,10 @@ double euclideanDistance(item item1, item item2, int dimension) {
 	}
 }
 
-void motionAnt(vector<vector<item> > *matriz, formiga *formiga, int tamMatrizI, int tamMatrizJ) {
+void motionAnt(vector<vector<item> > *matriz, formiga *formiga, int tamMatrizI, int tamMatrizJ, normalDim normalDim) {
 	int iAux = formiga->i, jAux = formiga->j, direcao;
 	if ((matriz->at(formiga->i).at(formiga->j).classe == 7) || (matriz->at(formiga->i).at(formiga->j).classe == 8))
-		viewAnt(matriz, formiga, tamMatrizI, tamMatrizJ);
+		viewAnt(matriz, formiga, tamMatrizI, tamMatrizJ, normalDim);
 	tamMatrizI--;
 	tamMatrizJ--;
 	direcao = rand() % 8;

@@ -13,9 +13,9 @@
 #define resolucao 800
 using namespace std;
 
-void interfaceGrafica(vector<vector<item> > *, vector<formiga> *, int, int, int, int);
-void update(vector<vector<item> > *, vector<formiga> *, int, int, int, sf::RenderWindow *, std::vector<std::vector<sf::RectangleShape> > *);
-void updateFinal(vector<vector<item> > *, vector<formiga> *, int, int, int, sf::RenderWindow *, std::vector<std::vector<sf::RectangleShape> > *);
+void interfaceGrafica(vector<vector<item> > *, vector<formiga> *, int, int, int, int, normalDim );
+void update(vector<vector<item> > *, vector<formiga> *, int, int, int, sf::RenderWindow *, std::vector<std::vector<sf::RectangleShape> > *, normalDim );
+void updateFinal(vector<vector<item> > *, vector<formiga> *, int, int, int, sf::RenderWindow *, std::vector<std::vector<sf::RectangleShape> > *, normalDim );
 void updateColor(vector<vector<item> > *, int, int, std::vector<std::vector<sf::RectangleShape> > *);
 
 
